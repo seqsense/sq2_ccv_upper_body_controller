@@ -1,0 +1,9 @@
+<library path="lib/libsq2_ccv_upper_body_controller">
+
+  <class name="sq2_ccv_upper_body_controller/SQ2CCVUpperBodyController" type="sq2_ccv_upper_body_controller::SQ2CCVUpperBodyController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      The SQ2CCVUpperBodyController tracks position commands. It expects 2 PositionJointInterface types of hardware interfaces.
+    </description>
+  </class>
+
+</library>
