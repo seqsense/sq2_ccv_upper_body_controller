@@ -137,6 +137,8 @@ namespace sq2_ccv_upper_body_controller{
 	std::vector<std::string> pitch_joint_names;
 	getJointNames(controller_nh, "roll_joint", roll_joint_names);
 	getJointNames(controller_nh, "pitch_joint", pitch_joint_names);
+	getAxesReverseds(controller_nh, "roll_axis_reversed", roll_axes_reversed_);
+	getAxesReverseds(controller_nh, "pitch_axis_reversed", pitch_axes_reversed_);
     
 	if(roll_joint_names.size() > 0 && pitch_joint_names.size() > 0){
         roll_joints_size = roll_joint_names.size();
@@ -146,17 +148,30 @@ namespace sq2_ccv_upper_body_controller{
 		return false;
 	}
 
+	if(roll_joints_size != roll_axes_reversed_.size()){
+		roll_axes_reversed_.clear();
+		for(size_t i=0;i<roll_joints_size;i++){
+            roll_axes_reversed_.push_back(false);
+		}
+	}
+	if(pitch_joints_size != pitch_axes_reversed_.size()){
+		pitch_axes_reversed_.clear();
+		for(size_t i=0;i<pitch_joints_size;i++){
+            pitch_axes_reversed_.push_back(false);
+		}
+	}
+
 	roll_joints_.resize(roll_joints_size);
 	pitch_joints_.resize(pitch_joints_size);
 
 	for(size_t i = 0;i < roll_joints_size;i++){
         ROS_INFO_STREAM_NAMED(name_,
-                              "Adding roll with joint name: " << roll_joint_names[i]);
+                              "Adding roll with joint name: " << roll_joint_names[i] << "\treversed: " << roll_axes_reversed_[i]);
 		roll_joints_[i] = hw->getHandle(roll_joint_names[i]);
 	}
 	for(size_t i = 0;i < pitch_joints_size;i++){
         ROS_INFO_STREAM_NAMED(name_,
-                              "Adding pitch with joint name: " << pitch_joint_names[i]);
+                              "Adding pitch with joint name: " << pitch_joint_names[i] << "\treversed: " << pitch_axes_reversed_[i]);
 		pitch_joints_[i] = hw->getHandle(pitch_joint_names[i]);
 	}
 
@@ -175,7 +190,8 @@ namespace sq2_ccv_upper_body_controller{
 		roll_angle += M_PI;
 	}
 	for(size_t i=0;i<roll_joints_size;i++){
-		roll_joints_[i].setCommand(roll_angle);
+		double angle = roll_angle * (roll_axes_reversed_[i] ? -1 : 1);
+		roll_joints_[i].setCommand(angle);
 	}
 
 	double pitch_angle = curr_cmd.pitch;
@@ -185,7 +201,8 @@ namespace sq2_ccv_upper_body_controller{
 		pitch_angle += M_PI;
 	}
 	for(size_t i=0;i<pitch_joints_size;i++){
-		pitch_joints_[i].setCommand(pitch_angle);
+		double angle = pitch_angle * (pitch_axes_reversed_[i] ? -1 : 1);
+		pitch_joints_[i].setCommand(angle);
 	}
   }
 
@@ -279,5 +296,57 @@ namespace sq2_ccv_upper_body_controller{
       return true;
   }
 
+    bool SQ2CCVUpperBodyController::getAxesReverseds(ros::NodeHandle& controller_nh,
+                          const std::string& axes_param,
+                          std::vector<bool>& joint_axes)
+  {
+      XmlRpc::XmlRpcValue axes_list;
+      if (!controller_nh.getParam(axes_param, axes_list))
+      {
+        ROS_ERROR_STREAM_NAMED(name_,
+            "Couldn't retrieve param '" << axes_param << "'.");
+        return false;
+      }
+
+      if (axes_list.getType() == XmlRpc::XmlRpcValue::TypeArray)
+      {
+        if (axes_list.size() == 0)
+        {
+          ROS_ERROR_STREAM_NAMED(name_,
+              "Axes param '" << axes_param << "' is an empty list");
+          return false;
+        }
+
+        for (int i = 0; i < axes_list.size(); ++i)
+        {
+          if (axes_list[i].getType() != XmlRpc::XmlRpcValue::TypeBoolean)
+          {
+            ROS_ERROR_STREAM_NAMED(name_,
+                "Axes param '" << axes_param << "' #" << i <<
+                " isn't a string.");
+            return false;
+          }
+        }
+
+        joint_axes.resize(axes_list.size());
+        for (int i = 0; i < axes_list.size(); ++i)
+        {
+          joint_axes[i] = static_cast<bool>(axes_list[i]);
+        }
+      }
+      else if (axes_list.getType() == XmlRpc::XmlRpcValue::TypeBoolean)
+      {
+        joint_axes.push_back(axes_list);
+      }
+      else
+      {
+        ROS_ERROR_STREAM_NAMED(name_,
+            "Axes param '" << axes_param <<
+            "' is neither a list of strings nor a string.");
+        return false;
+      }
+
+      return true;
+  }
 } // namespace sq2_ccv_upper_body_controller
 

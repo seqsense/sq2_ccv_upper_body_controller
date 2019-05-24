@@ -106,6 +106,8 @@ namespace sq2_ccv_upper_body_controller{
 	/// params
 	double roll_angle_absolute_value_limit_;
 	double pitch_angle_absolute_value_limit_;
+	std::vector<bool> roll_axes_reversed_;
+	std::vector<bool> pitch_axes_reversed_;
 
     struct Commands
     {
@@ -139,6 +141,10 @@ namespace sq2_ccv_upper_body_controller{
     bool getJointNames(ros::NodeHandle& controller_nh,
                        const std::string& joint_param,
                        std::vector<std::string>& joint_names);
+
+    bool getAxesReverseds(ros::NodeHandle& controller_nh,
+                          const std::string& axes_param,
+                          std::vector<bool>& joint_axes);
 
   };
 
