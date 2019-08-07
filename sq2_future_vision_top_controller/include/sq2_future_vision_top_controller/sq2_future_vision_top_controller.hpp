@@ -42,9 +42,9 @@
 #include <pluginlib/class_list_macros.hpp>
 #include <realtime_tools/realtime_buffer.h>
 #include <realtime_tools/realtime_publisher.h>
-#include <tf/tfMessage.h>
+#include <tf2/tfMessage.h>
 
-#include "sq2_ccv_roll_pitch_msgs/RollPitch.h"
+#include "sq2_ccv_roll_pitch_msgs/RollPitch.hpp"
 
 namespace sq2_ccv_upper_body_controller{
 

@@ -33,8 +33,8 @@
  *********************************************************************/
 
 #include <cmath>
-#include <sq2_ccv_upper_body_controller/sq2_ccv_upper_body_controller.h>
-#include <tf/transform_datatypes.h>
+#include <sq2_future_vision_top_controller/sq2_future_vision_top_controller.hpp>
+#include <tf2/transform_datatypes.h>
 #include <urdf/urdfdom_compatibility.h>
 #include <urdf_parser/urdf_parser.h>
 
