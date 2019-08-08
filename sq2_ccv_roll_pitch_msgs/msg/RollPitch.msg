@@ -1,2 +1,2 @@
-float32 roll
-float32 pitch 
+float64 roll
+float64 pitch 
